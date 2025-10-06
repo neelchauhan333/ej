@@ -1,0 +1,893 @@
+Practical 1: Craeting a nasic calculator using the java Servlet and Netbeans Idle
+Index.html
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <form method="post" action="NewServlet">
+            <label for="num1">First Number:</label>
+            <input type="text" id="num1" name="num1"><br/>
+            <label for="num2">Second Number:</label>
+            <input type="text" id="num2" name="num2"><br/>
+            <label for="method">Select the operation:</label>
+            <select name="opr">
+                <option value="+">+</option>
+                <option value="-">-</option>
+                <option value="*">*</option>
+                <option value="/">/</option>
+            </select><br/>
+            <button> Calculate </button>
+        </form>
+    </body>
+</html>
+NewServlet
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet(urlPatterns = {"/NewServlet"})
+public class NewServlet extends HttpServlet {
+
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet NewServlet</title>");            
+            out.println("</head>");
+            out.println("<body>");
+            int a = Integer.parseInt(request.getParameter("num1"));
+            int b = Integer.parseInt(request.getParameter("num2"));
+            String opr = request.getParameter("opr");
+            switch(opr){
+                case "+": out.println("<h2> Addition of Number: " + (a+b) + "</h2>");
+                break;
+                case "-": out.println("<h2> Subtraction of Number: " + (a-b) + "</h2>");
+                break;
+                case "*": out.println("<h2> Multiplication of Number: " + (a*b) + "</h2>");
+                break;
+                case "/": out.println("<h2> Division of Number: " + (a/b) + "</h2>");
+                break;
+                default: out.println("Invalid Operation");
+            }
+            out.println("</body>");
+            out.println("</html>");
+        }
+    }
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }
+}
+Output:
+      
+
+
+
+
+
+Practical 2
+Index.html
+Code:
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Registration</title>
+</head>
+<body>
+  <h2>User Registration Form</h2>
+  <form method="post" action="NewServlet">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required>
+    <br><br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required>
+    <br><br>
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+    <br><br>
+    <label for="country">Country:</label>
+    <select id="country" name="country" required>
+      <option value="">--Select Country--</option>
+      <option value="usa">USA</option>
+      <option value="uk">UK</option>
+      <option value="india">India</option>
+      <option value="canada">Canada</option>
+    </select>
+    <br><br>
+    <input type="submit" value="Register">
+  </form>
+</body>
+</html>
+NewServlet
+Code:
+package abhi;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet(name = "NewServlet", urlPatterns = {"/NewServlet"})
+public class NewServlet extends HttpServlet {
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String email = request.getParameter("email");
+        String country = request.getParameter("country");
+        
+        Connection con = null;
+        PreparedStatement ps = null;
+        
+        try {
+            Class.forName("org.apache.derby.jdbc.ClientDriver");
+            
+            con = DriverManager.getConnection(
+                "jdbc:derby://localhost:1527/Abhi14", "Abhishek", "Root");
+            
+            String sql = "INSERT INTO STUDENT (USERNAME, PASSWORD, EMAIL, COUNTRY) VALUES (?, ?, ?, ?)";
+            ps = con.prepareStatement(sql);
+            ps.setString(1, username);
+            ps.setString(2, password);
+            ps.setString(3, email);
+            ps.setString(4, country);
+            
+            int rows = ps.executeUpdate();
+            
+            if (rows > 0) {
+                out.println("<h3>Registration Successful!</h3>");
+            } else {
+                out.println("<h3>Registration Failed. Try again.</h3>");
+            }
+            
+        } catch (Exception e) {
+            out.println("<h3>Error: " + e.getMessage() + "</h3>");
+            e.printStackTrace(out);
+        } finally {
+            try {
+                if (ps != null) ps.close();
+                if (con != null) con.close();
+            } catch (SQLException ex) {
+                ex.printStackTrace(out);
+            }
+        }
+    }
+}
+Output:
+ 
+ 
+
+
+
+ 
+Practical 3:cookie store
+NewServlet
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet(urlPatterns = {"/NewServlet"})
+public class NewServlet extends HttpServlet {
+    static int i = 1;
+
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet NewServlet</title>");
+            out.println("</head>");
+            out.println("<body>");
+
+            Cookie c = new Cookie("visit", String.valueOf(i));
+            response.addCookie(c);
+            int j = Integer.parseInt(c.getValue());
+            if (j == 1) {
+                out.println("<h1> Welcome to our website</h1>");
+            } else if (j == 10) {
+                i = 0;
+                out.println("<h1> You have visited this website: " + j + " times</h1>");
+            } else {
+                out.println("<h1> You have visited this website: " + j + " times</h1>");
+            }
+            i++;
+            out.println("</body>");
+            out.println("</html>");
+        }
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }
+}
+Ouput:
+   
+
+
+
+
+
+
+
+Practical 4
+NewServlet 
+code:
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Date;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+@WebServlet(urlPatterns = {"/NewServlet"})
+public class NewServlet extends HttpServlet {
+
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet NewServlet</title>");            
+            out.println("</head>");
+            out.println("<body>");
+
+            HttpSession session = request.getSession(true);
+            Integer count = (Integer) session.getAttribute("count");
+            if (count == null) {
+                count = 0;
+                out.println("<h1>Welcome New User</h1>");
+            } else {
+                count++;
+                out.println("<h1>Welcome Back</h1>");
+            }
+            session.setAttribute("count", count);
+            out.println("<TABLE BORDER=1 ALIGN=CENTER>");
+            out.println("<TR BGCOLOR=\"#FFAD00\">");
+            out.println("<TH> Info Type<TH>Value");
+            out.println("<TR>");
+            out.println("<TD>ID<TD>" + session.getId());
+            out.println("<TR>");
+            out.println("<TD>Creation Time<TD>" + new Date(session.getCreationTime()));
+            out.println("<TR>");
+            out.println("<TD>Times of Last Access<TD>" + new Date(session.getLastAccessedTime()));
+            out.println("<TR>");
+            out.println("<TD>Number of Previous Accesses<TD>" + count);
+            out.println("</table>");
+            if (count >= 10) {
+                session.invalidate();
+                out.println("<h3>You clicked 10 times. Session ended.</h3>");
+            }
+            out.println("</body>");
+            out.println("</html>");
+        }
+    }
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }
+}
+Output:
+ 
+ 
+
+
+
+
+
+
+
+
+Practical 5
+Index.html
+Code:
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <form method="POST" action="NewServlet1">
+            <label> Name : </label>
+            <input type="text" name="username"><br/>
+            <label> Password:</label>
+            <input type="password" name="password"><br/>
+            <input type="submit"  value="login">
+        </form>
+    </body>
+</html>
+NewServlet1
+Code:
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet(urlPatterns = {"/NewServlet1"})
+public class NewServlet1 extends HttpServlet {
+
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet NewServlet1</title>");            
+            out.println("</head>");
+            out.println("<body>");
+            String n = request.getParameter("username");
+            String p = request.getParameter("password");
+          
+            if (p.equals("skinnyisha")) {
+                RequestDispatcher rd = request.getRequestDispatcher("WelcomeServlet");
+                rd.forward(request, response);
+            } else {
+                out.print("Sorry, username or password Invalid");
+                RequestDispatcher rd = request.getRequestDispatcher("index.html");
+                rd.include(request, response);
+            }
+            out.println("</body>");
+            out.println("</html>");
+        }
+    }
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }
+}
+WelcomeServlet
+code:
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet(urlPatterns = {"/WelcomeServlet"})
+public class WelcomeServlet extends HttpServlet {
+
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet WelcomeServlet</title>");            
+            out.println("</head>");
+            out.println("<body>");
+            String n = request.getParameter("username");
+            out.println("<h1> Welcome " + n + "</h1>");
+            out.println("</body>");
+            out.println("</html>");
+        }
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }
+}
+OutPut:
+ 
+ 
+
+
+
+
+
+
+ 
+Note that your password is: Skinnyisha as you define in NewServlet
+Practical 7: Q) Develop a simple JSP application, create a registration and login JSP application to register and authenticate the user based on username and password using JDBC.
+Code:
+login.jsp
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registration Form</title>
+</head>
+<body>
+    <h2>Registration Form</h2>
+    <form method="post" action="register.jsp">
+        <label>Username:</label>
+        <input type="text" name="name" required><br><br>
+
+        <label>Password:</label>
+        <input type="password" name="pass" required><br><br>
+
+        <label>Gender:</label>
+        <select name="gender" required>
+            <option value="">Select</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+        </select><br><br>
+
+        <label>Hobbies:</label><br>
+        <input type="checkbox" name="hobby" value="cricket"> Cricket<br>
+        <input type="checkbox" name="hobby" value="travelling"> Travelling<br>
+        <input type="checkbox" name="hobby" value="gaming"> Gaming<br>
+        <input type="checkbox" name="hobby" value="reading"> Reading<br><br>
+
+        <input type="submit" value="Register">
+    </form>
+</body>
+</html>
+register.jsp
+code:
+<%@page import="java.sql.*"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register Result</title>
+</head>
+<body>
+    <h3>Entered Values:</h3>
+    <%
+        // Get form parameters
+        String name = request.getParameter("name");
+        String pass = request.getParameter("pass");
+        String gender = request.getParameter("gender");
+        String[] hobbiesArray = request.getParameterValues("hobby");
+        
+        // Combine hobbies into a single string
+        String hobbies = "";
+        if (hobbiesArray != null) {
+            hobbies = String.join(", ", hobbiesArray);
+        }
+    %>
+    
+    <p>Username: <%= name %></p>
+    <p>Gender: <%= gender %></p>
+    <p>Hobbies: <%= hobbies %></p>
+    <%
+        try {
+            // Load Derby JDBC driver
+            Class.forName("org.apache.derby.jdbc.ClientDriver");
+            // Connect to database
+            Connection con = DriverManager.getConnection(
+                "jdbc:derby://localhost:1527/Tyit", "TYIT14", "Root"
+            );
+            // Insert data into database
+            String sql = "INSERT INTO UNTITLED (name, pass, gender, hobby) VALUES (?, ?, ?, ?)";
+            PreparedStatement pst = con.prepareStatement(sql);
+            pst.setString(1, name);
+            pst.setString(2, pass);
+            pst.setString(3, gender);
+            pst.setString(4, hobbies);
+            
+            int res = pst.executeUpdate();
+            if (res > 0) {
+                out.println("<p>Inserted successfully!</p>");
+            } else {
+                out.println("<p>Insert failed.</p>");
+            }
+            con.close();
+        } catch (Exception e) {
+            out.println("<p style='color:red;'>Error: " + e.getMessage() + "</p>");
+        }
+    %>
+    <p><a href="Login1.jsp">Click here to login</a></p>
+</body>
+</html>
+Login1.jsp
+Code:
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login</title>
+</head>
+<body>
+<h2>Login</h2>
+ <form method="post" action="validate.jsp">
+ <label for="USERNAME">Username:</label>
+ <input type="text" id="USERNAME" name="USERNAME" required><br><br>
+ <label for="PASSWORD">Password:</label>
+ <input type="password" id="PASSWORD" name="PASSWORD" required><br><br>
+ <input type="submit" value="Login">
+</form>
+</body>
+</html>
+validate.jsp
+code:
+<%@page import="java.sql.*"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <title>Login Result</title>
+</head>
+<body>
+<%
+ String USERNAME = request.getParameter("USERNAME");
+ String PASSWORD = request.getParameter("PASSWORD");
+ try {
+     Class.forName("org.apache.derby.jdbc.ClientDriver");
+     Connection con = DriverManager.getConnection("jdbc:derby://localhost:1527/Tyit","TYIT14","Root");
+     String sql = "SELECT * FROM UNTITLED WHERE name = ? AND pass = ?";
+     PreparedStatement ps = con.prepareStatement(sql);
+     ps.setString(1, USERNAME);
+     ps.setString(2, PASSWORD);
+     ResultSet rs = ps.executeQuery();
+     if (rs.next()) {
+         out.println("<h2>Login successful. Welcome, " + USERNAME + "!</h2>");
+     } else {
+         out.println("<h2>Login failed. Invalid username or password.</h2>");
+         out.println("<a href='login1.jsp'>Try again</a>");
+     }
+     rs.close();
+     ps.close();
+     con.close();
+ } catch (Exception e) {
+     out.println("<p>Error: " + e.getMessage() + "</p>");
+ }
+%>
+</body>
+</html>
+Output:
+         
+ 
+
+
+
+
+
+
+   
+ 
+
+Practical 8: Implement a Calculator using EJB.
+Index.html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Calculator</title>
+</head>
+<body>
+    <h2>Simple Calculator</h2>
+    <form method="post" action="NewServlet">
+        Number 1: <input type="text" name="t1" required><br><br>
+        Number 2: <input type="text" name="t2" required><br><br>
+        Operation:
+        <select name="operation" required>
+            <option value="">--Select--</option>
+            <option value="add">Add (+)</option>
+            <option value="subtract">Subtract (-)</option>
+            <option value="multiply">Multiply (×)</option>
+            <option value="divide">Divide (÷)</option>
+        </select><br><br>
+        <input type="submit" value="Calculate">
+    </form>
+</body>
+</html>
+NewServlet
+code:
+import calc.NewSessionBean;
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.ejb.EJB;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/NewServlet")
+public class NewServlet extends HttpServlet {
+    @EJB
+    private NewSessionBean newSessionBean;
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+        String t1 = request.getParameter("t1");
+        String t2 = request.getParameter("t2");
+        String operation = request.getParameter("operation");
+        String error = null;
+        Double result = null;
+        try {
+            int x = Integer.parseInt(t1);
+            int y = Integer.parseInt(t2);
+            if (operation == null || operation.isEmpty()) {
+                error = "Please select an operation!";
+            } else {
+                result = newSessionBean.calculator(x, y, operation);
+                if (result == null && "divide".equals(operation) && y == 0) {
+                    error = "Cannot divide by zero!";
+                } else if (result == null) {
+                    error = "Invalid operation!";
+                }
+            }
+        } catch (NumberFormatException e) {
+            error = "Please enter valid integers!";
+        }
+        out.println("<html><body>");
+        out.println("<h2>Simple Calculator Result</h2>");
+        if (error != null) {
+            out.println("<p style='color:red;'>" + error + "</p>");
+        } else {
+            out.println("<p>Result: " + result + "</p>");
+        }
+        out.println("<a href='index.html'>Back</a>");
+        out.println("</body></html>");
+    }
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+}
+NewSessionBean.java
+Code:
+package calc;
+import javax.ejb.Stateless;
+@Stateless
+public class NewSessionBean {
+    public Double calculator(int x, int y, String operation) {
+        switch (operation) {
+            case "add":
+                return (double) (x + y);
+            case "subtract":
+                return (double) (x - y);
+            case "multiply":
+                return (double) (x * y);
+            case "divide":
+                if (y == 0) {
+                    return null;
+                }
+                return (double) x / y;
+            default:
+                return null;
+        }
+    }
+}
+Output:
+
+
+
+
+
+
+
+
+
+
+
+   
+Practical 9: Implement currencyconverter using ejb
+Index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Currency Converter</title>
+</head>
+<body>
+    <h2>Currency Converter</h2>
+    <form action="NewServlet" method="post">
+        <label>Enter Amount:</label>
+        <input type="number" name="amount" required><br><br>
+        <label>From Currency:</label>
+        <select name="fromCurrency" required>
+            <option value="USD">USD ($)</option>
+            <option value="INR">INR (₹)</option>
+            <option value="EUR">EUR (€)</option>
+        </select><br><br>
+        <button type="submit">Convert</button>
+    </form>
+</body>
+</html>
+NewServlet
+package abhi;
+import java.io.IOException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+@WebServlet("/NewServlet")
+public class NewServlet extends HttpServlet {
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        double amount = Double.parseDouble(request.getParameter("amount"));
+        String fromCurrency = request.getParameter("fromCurrency");
+        NewSessionBean converter = new NewSessionBean(amount, fromCurrency);
+        double inr = converter.convertToINR();
+        double usd = converter.convertToUSD();
+        double eur = converter.convertToEUR();
+
+        request.setAttribute("usd", usd);
+        request.setAttribute("inr", inr);
+        request.setAttribute("eur", eur);
+        request.setAttribute("originalCurrency", fromCurrency);
+        request.setAttribute("originalAmount", amount);
+
+        RequestDispatcher dispatcher = request.getRequestDispatcher("result.jsp");
+        dispatcher.forward(request, response);
+    }
+}
+NewSessionBean
+package abhi;
+public class NewSessionBean {
+    private double amount;
+    private String fromCurrency;
+
+    private static final double USD_TO_INR = 83.20;
+    private static final double USD_TO_EUR = 0.92;
+
+    public NewSessionBean() {
+    }
+    public NewSessionBean(double amount, String fromCurrency) {
+        this.amount = amount;
+        this.fromCurrency = fromCurrency.toUpperCase();
+    }
+    public double convertToINR() {
+        switch (fromCurrency) {
+            case "USD":
+                return amount * USD_TO_INR;
+            case "EUR":
+                return convertToUSD() * USD_TO_INR;
+            case "INR":
+                return amount;
+            default:
+                throw new IllegalArgumentException("Invalid currency: " + fromCurrency);
+        }
+    }
+    public double convertToUSD() {
+        switch (fromCurrency) {
+            case "INR":
+                return amount / USD_TO_INR;
+            case "EUR":
+                return amount / USD_TO_EUR;
+            case "USD":
+                return amount;
+            default:
+                throw new IllegalArgumentException("Invalid currency: " + fromCurrency);
+        }
+    }
+    public double convertToEUR() {
+        switch (fromCurrency) {
+            case "USD":
+                return amount * USD_TO_EUR;
+            case "INR":
+                return convertToUSD() * USD_TO_EUR;
+            case "EUR":
+                return amount;
+            default:
+                throw new IllegalArgumentException("Invalid currency: " + fromCurrency);
+        }
+    }
+}
+result.jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Conversion Results</title>
+</head>
+<body>
+    <h2>Converted Amounts</h2>
+    <p>Original: <strong>${originalAmount} ${originalCurrency}</strong></p>
+    <p>In INR (₹): <strong>${inr}</strong></p>
+    <p>In USD ($): <strong>${usd}</strong></p>
+    <p>In EUR (€): <strong>${eur}</strong></p>
+    <br>
+    <a href="index.html">Convert Again</a>
+</body>
+</html>
+Output:
+ 
+ 
+
