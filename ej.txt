@@ -633,6 +633,63 @@ Output:
 
 
 
+<< Practical 8a: Implement Function Tag in Java Server Page Standard Tag Library (JSTL). >>
+---
+Newjsp.jsp:-
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>JSP Page</title>
+    </head>
+    <body>
+        <h1>Hello Harshallaaaa Maaam Here!!!!!</h1>
+        
+        <c:set var="String1" value="This is 1st String"/>
+        
+        <c:set var="String2" value="${fn:toLowerCase(String1)}"/>
+        <c:set var="String3" value="${fn:toUpperCase(String1)}"/>
+        
+        <p>Original String: ${String1}</p>
+        <p>LowerCase String: ${String2}</p>
+        <p>UpperCase String: ${String3}</p>
+        
+    </body>
+</html>
+
+
+
+
+<< Practical 8b: Implement Core Tag (For Each) in JSTL. >>
+---
+Newjsp.jsp:-
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib uri = "http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>JSP Page</title>
+    </head>
+    <body>
+        <h1>List of Names</h1>
+        
+        <c:set var="Name" value="${['Ruby','Alia','Boss','Don']}" />
+        
+        <ul>
+            <c:forEach var="Name" items="${Name}">
+                <li>${Name}</li>
+                
+            </c:forEach>
+        </ul>
+    </body>
+</html>
+
 
 
 
@@ -890,4 +947,5 @@ result.jsp
 Output:
  
  
+
 
